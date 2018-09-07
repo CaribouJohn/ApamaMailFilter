@@ -1,0 +1,67 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1",
+    "title": "Swagger definition for HTTPServer",
+    "description": "Swagger/OpenAPI 2.0 definition for HTTPServer"
+  },
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "definitions": {
+    "HTTPServer_data": {
+      "type": "object"
+    },
+    "eventAndPayload": {
+      "type": "object",
+      "required": [
+        "type",
+        "channel",
+        "data"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "channel": {
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/definitions/HTTPServer_data"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "put": {
+        "summary": "Send event to a named channel",
+        "description": "The JSON payload contains an event consisting of fields.",
+        "parameters": [
+          {
+            "name": "HTTPServer_data",
+            "description": "Event Data for HTTPServer coupled with channel and event type",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/eventAndPayload"
+            }
+          }
+        ],
+        "responses": {
+          "202": {"description": "Accepted"},
+          "400": {"description": "Bad Request"},
+          "401": {"description": "Unauthorized"},
+          "405": {"description": "Method Not Allowed"},
+          "429": {"description": "Too Many Requests"},
+          "500": {"description": "Internal Server Error"}          
+        }
+      }
+    }
+  }
+}

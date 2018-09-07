@@ -1,0 +1,70 @@
+# $Copyright (c) 2017-2018 Software AG, Darmstadt, Germany and/or Software AG USA Inc., Reston, VA, USA, and/or its subsidiaries and/or its affiliates and/or their licensors.$
+# Use, reproduction, transfer, publication or disclosure is prohibited except as specifically provided for in your License Agreement with Software AG
+# This is a YAML configuration file. See the associated .properties file for an 
+# easy way to change the most commonly needed configuration settings. 
+#
+# When editing YAML files, be sure to use spaces (not tabs) for indentation. 
+# List entries are denoted by a line beginning with hyphen and space ("- ").
+# Map key and value pairs are separated by a colon and new line or space ("key: value").
+# Empty strings and those that need escaping should be surrounded by double-quotes ("...").
+# Apama replaces ${prop} substitution variables with the configured value of the 
+# specified property, taken from the command line or from .properties files. 
+#
+
+###########################################################################################
+# The HTTPServer is a transport for use in connectivity plug-ins which can act as HTTPServer.
+###########################################################################################
+
+connectivityPlugins:
+    HTTPServerTransport:
+        libraryName: connectivity-http-server
+        class: HTTPServer
+         
+dynamicChainManagers:
+    HTTPServerManager:
+        transport: HTTPServerTransport
+        managerConfig:
+            port: ${HTTPServer_port}
+            tls: ${HTTPServer_tlsEnabled}
+            tlsKeyFile: ${HTTPServer_tlsKeyFile}
+            tlsCertificateFile: ${HTTPServer_tlsCertificateFile}
+            staticFiles:
+                /index.html:
+                    file: html/index.html
+                    contentType: text/html
+                    charset: utf-8                   
+                /ui.js:
+                    file: html/ui.js
+                    contentType: text/javascript
+                    charset: utf-8                   
+                /hostdetails.json:
+                    file: hostdetails.json
+                    contentType: text/html
+                    charset: utf-8                   
+                /swagger.json:
+                    file: ${PARENT_DIR}/swagger_HTTPServer.json
+                    contentType: application/json
+                    charset: utf-8                   
+
+# A single chain template from which a dynamic chain will be created for each incoming request
+dynamicChains:
+    HTTPServerChain:
+        - apama.eventMap        
+        - mapperCodec:
+            "*":
+                towardsHost:
+                    mapFrom:
+                        - metadata.sag.type: metadata.http.queryString.type
+                        - metadata.sag.channel: metadata.http.queryString.channel
+        - diagnosticCodec:
+        - jsonCodec
+        # Codec that logs message contents during testing/debugging - should be commented out in production
+
+        - stringCodec
+        
+        - HTTPServerTransport:
+            authentication:
+              authenticationType: ${HTTPServer_authenticationType}
+              allowedUsersFile: ${HTTPServer_allowedUsersFile}
+            automaticResponses: true
+            allowedMethods: [PUT]

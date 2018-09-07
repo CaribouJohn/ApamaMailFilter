@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Apama Mail Filter</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--
+  		Using Bootstrap and semantic UI for layout and vue for the dynamic
+  		content and update. Note The HTTPServer connectivity plugin is 
+  		not a full http-server implementation. Any files served from 
+  		Apama would need to be fully specified in the configuration.
+   -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.6/semantic.min.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<!-- stop favicon  -->
+<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+</head>
+<body>
+
+	<div id="app" class="container" >
+		<div class="ui top attached teal button" v-on:click="refresh()">Refresh</div>
+		<my-tabs> 
+			<!-- Basic Parameters  -->
+			<my-tab title="Control" v-bind:is-active="true">
+				<div>
+					<table class="table table-striped" v-bind="parameters">
+						<!-- 
+							{"parameters": {"simulate": "True", "moveToFolderThreshold": "5", "updateFrequency": "60"}, "sourcehosts": {}, "lastmessage": 1}
+						-->
+						<tr>
+							<td>
+								Form Update Frequency
+							</td>
+							<td>
+								{{ parameters.updateFrequency }}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Mail received threshold
+							</td>
+							<td>
+								{{ parameters.moveToFolderThreshold }}
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Audit only
+							</td>
+							<td>
+								{{ parameters.simulate }}
+							</td>
+						</tr>
+					</table>
+				</div>
+			</my-tab> 
+			<my-tab title="Senders" >
+				<div>
+					<table class="table table-striped">
+						<!-- 
+							the following renders the sourcehosts object (a dictionary)
+							skipping rows that contain less than the "moveToFolderThreshold"
+							occurrences
+						-->
+						<tr v-for="record in sourcehosts"
+							v-if="record.occurrences >= parameters.moveToFolderThreshold && record.moveToFolder == false">
+							<td>
+								{{ record.hostname }}
+							</td>
+							<td>
+								{{ record.occurrences }}
+							</td>
+							<td>
+								<button 
+									class="ui teal button"
+									v-on:click="addRule(record.hostname)">
+								  Add Rule
+								</button>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</my-tab> 
+			<my-tab title="Active Rules">
+				<div>
+					<table class="table table-striped">
+						<!-- 
+							the following renders the sourcehosts object (a dictionary)
+							skipping rows that contain less than the "moveToFolderThreshold"
+							occurrences
+						-->
+						<tr v-for="record in sourcehosts"
+							v-if="record.occurrences >= parameters.moveToFolderThreshold && record.moveToFolder == true">
+							<td>
+								{{ record.hostname }}
+							</td>
+							<td>
+								{{ record.occurrences }}
+							</td>
+							<td>
+								<button 
+									class="ui red button" 
+									v-on:click="delRule(record.hostname)">
+								  Remove Rule
+								</button>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</my-tab> 
+		</my-tabs>
+	</div>
+
+
+
+	<!--  the tab header  -->
+	<template id="tabs">
+	<div>
+		<div class="ui top attached tabular menu">
+			<div v-for="tab in tabs"
+				v-bind:class="[{'active': current === tab},'item']"
+				v-on:click="changeTab(tab)">
+				<b>{{tab.title}}</b> 			
+				<!-- DISABLED i class="remove icon"
+					v-on:click.stop="removeTab(tab)"></i> -->
+			</div>
+		</div>
+		<slot></slot>
+	</div>
+	</template>
+
+	<!--  the tab  -->
+	<template id="tab">
+	<div
+		v-bind:class="['ui', 'bottom', 'attached', {'active': active}, 'tab', 'segment']">
+		<slot></slot>
+	</div>
+	</template>
+
+
+	<!--
+  		Simple script to render the data and create the 
+  		vue object. In a more complex application you 
+  		would separate this out and organise better
+  	 -->
+	<script src="ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+	"mail" : {
+		"host": "imaphost",
+		"port": "143",
+		"user":"me@mymailprovider.com",
+		"password":"verysecret"
+	}
+}
+
