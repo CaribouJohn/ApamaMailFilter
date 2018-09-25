@@ -8,8 +8,8 @@
 
 /**
 	The python will monitor the IMAP mail
-	in idle mode and send events to Apama 
-	when messages are recieved
+	in a background thread and send events to Apama 
+	when messages are recieved.
 */
 event MailUpdate{
 	integer msgid;
@@ -36,14 +36,12 @@ event MailSummary{
 	string folder;
 }
 
+/**
+	page triggers this event after user clicks on the button (add/remove) rule
+*/
 event UpdateRule{
 	string hostname;
 	boolean enabled;
-}
-
-event UpdateParameter{
-	string name;
-	string value;
 }
 
 //The idea of this is that we only update the Corrlator model
@@ -92,9 +90,8 @@ monitor MailFilter {
 	}
 	
 	
-	//here we going to check whether itis a host that should be 
-	//actioned in some way, and also update stats and potentially 
-	//save the stats.
+	//here we going to check whether it is a host that should be 
+	//actioned in some way
 	action processUpdate(MailUpdate mailUpdate) {
 		log "Mail UPDATE " + mailUpdate.toString() + " received " at INFO;
 		//Make a directory with the hostname, 
